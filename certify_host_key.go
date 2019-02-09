@@ -63,11 +63,10 @@ func (k *HostKey) CertifyHostBindingKey(key RegisterKeyInfo) (*BindingKeyCert, e
 	req.SetBasicAuth(k.client.Username, k.client.Password)
 
 	rsp, err := k.client.dispatchRequest(req)
-	defer rsp.Body.Close()
 	if err != nil || rsp.StatusCode != 200 {
 		return nil, errors.New("error registering binding key with HVS. " + err.Error())
 	}
-
+	defer rsp.Body.Close()
 	err = json.NewDecoder(rsp.Body).Decode(&keyCert)
 	if err != nil {
 		return nil, errors.New("error decoding binding key certificate. " + err.Error())
@@ -99,10 +98,11 @@ func (k *HostKey) CertifyHostSigningKey(key RegisterKeyInfo) (*SigningKeyCert, e
 	req.SetBasicAuth(k.client.Username, k.client.Password)
 
 	rsp, err := k.client.dispatchRequest(req)
-	defer rsp.Body.Close()
+
 	if err != nil || rsp.StatusCode != 200 {
 		return nil, errors.New("error registering signing key with HVS. " + err.Error())
 	}
+	defer rsp.Body.Close()
 
 	err = json.NewDecoder(rsp.Body).Decode(&keyCert)
 	if err != nil {

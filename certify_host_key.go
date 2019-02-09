@@ -45,17 +45,17 @@ func (k *HostKey) CertifyHostBindingKey(key RegisterKeyInfo) (*BindingKeyCert, e
 
 	kiJSON, err := json.Marshal(key)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error marshalling binding key. " + err.Error())
 	}
 
 	certifyKeyURL, err := url.Parse(k.client.BaseURL + "/rpc/certify-host-binding-key")
 	if err != nil {
-		return nil, errors.New("error parsing url")
+		return nil, errors.New("error parsing url for binding key. " + err.Error())
 	}
 
 	req, err := http.NewRequest("POST", certifyKeyURL.String(), bytes.NewBuffer(kiJSON))
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error sending request to HVS. " + err.Error())
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -64,10 +64,13 @@ func (k *HostKey) CertifyHostBindingKey(key RegisterKeyInfo) (*BindingKeyCert, e
 
 	rsp, err := k.client.dispatchRequest(req)
 	defer rsp.Body.Close()
+	if err != nil || rsp.StatusCode != 200 {
+		return nil, errors.New("error registering binding key with HVS. " + err.Error())
+	}
 
 	err = json.NewDecoder(rsp.Body).Decode(&keyCert)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error decoding binding key certificate. " + err.Error())
 	}
 	return &keyCert, nil
 }
@@ -78,16 +81,17 @@ func (k *HostKey) CertifyHostSigningKey(key RegisterKeyInfo) (*SigningKeyCert, e
 
 	kiJSON, err := json.Marshal(key)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error marshalling signing key. " + err.Error())
 	}
 
 	certifyKeyURL, err := url.Parse(k.client.BaseURL + "/rpc/certify-host-signing-key")
 	if err != nil {
-		return nil, errors.New("error parsing url")
+		return nil, errors.New("error parsing url for signing key. " + err.Error())
 	}
+
 	req, err := http.NewRequest("POST", certifyKeyURL.String(), bytes.NewBuffer(kiJSON))
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error sending request to HVS. " + err.Error())
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -96,10 +100,13 @@ func (k *HostKey) CertifyHostSigningKey(key RegisterKeyInfo) (*SigningKeyCert, e
 
 	rsp, err := k.client.dispatchRequest(req)
 	defer rsp.Body.Close()
+	if err != nil || rsp.StatusCode != 200 {
+		return nil, errors.New("error registering signing key with HVS. " + err.Error())
+	}
 
 	err = json.NewDecoder(rsp.Body).Decode(&keyCert)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("error decoding signing key certificate. " + err.Error())
 	}
 	return &keyCert, nil
 }

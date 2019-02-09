@@ -42,8 +42,8 @@ func (c *Client) httpClient() *http.Client {
 }
 
 // Keys returns a sub client that operates on hvs /keys endpoints, such as creating a new key
-func (c *Client) Keys() *Keys {
-	return &Keys{client: c}
+func (c *Client) HostKey() *HostKey {
+	return &HostKey{client: c}
 }
 
 func (c *Client) dispatchRequest(req *http.Request) (*http.Response, error) {

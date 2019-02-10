@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 )
 
 // Error is an error struct that contains error information thrown by the actual HVS
@@ -45,17 +47,18 @@ func (k *HostKey) CertifyHostBindingKey(key RegisterKeyInfo) (*BindingKeyCert, e
 
 	kiJSON, err := json.Marshal(key)
 	if err != nil {
-		return nil, errors.New("error marshalling binding key. " + err.Error())
+		return nil, errors.New("error marshalling binding key ")
 	}
-
-	certifyKeyURL, err := url.Parse(k.client.BaseURL + "/rpc/certify-host-binding-key")
+	certifyKeyURL, err := url.Parse(k.client.BaseURL)
 	if err != nil {
-		return nil, errors.New("error parsing url for binding key. " + err.Error())
+		return nil, errors.New("error parsing base url. " + err.Error())
 	}
-
+	
+	certifyKeyURL.Path = path.Join(certifyKeyURL.Path,"/rpc/certify-host-binding-key")
+	   
 	req, err := http.NewRequest("POST", certifyKeyURL.String(), bytes.NewBuffer(kiJSON))
 	if err != nil {
-		return nil, errors.New("error sending request to HVS. " + err.Error())
+		return nil, errors.New(err.Error())
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -63,9 +66,12 @@ func (k *HostKey) CertifyHostBindingKey(key RegisterKeyInfo) (*BindingKeyCert, e
 	req.SetBasicAuth(k.client.Username, k.client.Password)
 
 	rsp, err := k.client.dispatchRequest(req)
-	if err != nil || rsp.StatusCode != 200 {
-		return nil, errors.New("error registering binding key with HVS. " + err.Error())
+	
+	if rsp.StatusCode != http.StatusOK {
+		errMsgBytes, _ := ioutil.ReadAll(rsp.Body)
+		return nil, &Error{StatusCode: rsp.StatusCode, Message: fmt.Sprintf("Failed to register host binding key with HVS. Error : %s", string(errMsgBytes))}
 	}
+
 	defer rsp.Body.Close()
 	err = json.NewDecoder(rsp.Body).Decode(&keyCert)
 	if err != nil {
@@ -80,17 +86,20 @@ func (k *HostKey) CertifyHostSigningKey(key RegisterKeyInfo) (*SigningKeyCert, e
 
 	kiJSON, err := json.Marshal(key)
 	if err != nil {
-		return nil, errors.New("error marshalling signing key. " + err.Error())
+		return nil, errors.New("error marshalling signing key. ")
 	}
-
-	certifyKeyURL, err := url.Parse(k.client.BaseURL + "/rpc/certify-host-signing-key")
+	
+	certifyKeyURL, err := url.Parse(k.client.BaseURL)
 	if err != nil {
-		return nil, errors.New("error parsing url for signing key. " + err.Error())
+		return nil, errors.New("error parsing base url. " + err.Error())
 	}
-
+	
+	certifyKeyURL.Path = path.Join(certifyKeyURL.Path,"/rpc/certify-host-signing-key")
+	fmt.Println(certifyKeyURL.String())
+	
 	req, err := http.NewRequest("POST", certifyKeyURL.String(), bytes.NewBuffer(kiJSON))
 	if err != nil {
-		return nil, errors.New("error sending request to HVS. " + err.Error())
+		return nil, errors.New(err.Error())
 	}
 
 	req.Header.Set("Accept", "application/json")
@@ -99,8 +108,9 @@ func (k *HostKey) CertifyHostSigningKey(key RegisterKeyInfo) (*SigningKeyCert, e
 
 	rsp, err := k.client.dispatchRequest(req)
 
-	if err != nil || rsp.StatusCode != 200 {
-		return nil, errors.New("error registering signing key with HVS. " + err.Error())
+	if rsp.StatusCode != http.StatusOK {
+		errMsgBytes, _ := ioutil.ReadAll(rsp.Body)
+		return nil, &Error{StatusCode: rsp.StatusCode, Message: fmt.Sprintf("Failed to register host signing key with HVS . Error : %s", string(errMsgBytes))}
 	}
 	defer rsp.Body.Close()
 

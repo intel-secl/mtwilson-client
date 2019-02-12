@@ -95,7 +95,6 @@ func (k *HostKey) CertifyHostSigningKey(key RegisterKeyInfo) (*SigningKeyCert, e
 	}
 
 	certifyKeyURL.Path = path.Join(certifyKeyURL.Path, "/rpc/certify-host-signing-key")
-	fmt.Println(certifyKeyURL.String())
 
 	req, err := http.NewRequest("POST", certifyKeyURL.String(), bytes.NewBuffer(kiJSON))
 	if err != nil {

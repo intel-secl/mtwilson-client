@@ -31,10 +31,10 @@ type RegisterKeyInfo struct {
 	OsType                 string `json:"operating_system,omitempty"`
 }
 type BindingKeyCert struct {
-	BindingKeyCertificate string `json:"binding_key_der_certificate,omitempty"`
+	BindingKeyCertificate []byte `json:"binding_key_der_certificate,omitempty"`
 }
 type SigningKeyCert struct {
-	SigningKeyCertificate string `json:"signing_key_der_certificate,omitempty"`
+	SigningKeyCertificate []byte `json:"signing_key_der_certificate,omitempty"`
 }
 
 func (e Error) Error() string {
@@ -53,9 +53,9 @@ func (k *HostKey) CertifyHostBindingKey(key RegisterKeyInfo) (*BindingKeyCert, e
 	if err != nil {
 		return nil, errors.New("error parsing base url. " + err.Error())
 	}
-	
-	certifyKeyURL.Path = path.Join(certifyKeyURL.Path,"/rpc/certify-host-binding-key")
-	   
+
+	certifyKeyURL.Path = path.Join(certifyKeyURL.Path, "/rpc/certify-host-binding-key")
+
 	req, err := http.NewRequest("POST", certifyKeyURL.String(), bytes.NewBuffer(kiJSON))
 	if err != nil {
 		return nil, errors.New(err.Error())
@@ -66,7 +66,7 @@ func (k *HostKey) CertifyHostBindingKey(key RegisterKeyInfo) (*BindingKeyCert, e
 	req.SetBasicAuth(k.client.Username, k.client.Password)
 
 	rsp, err := k.client.dispatchRequest(req)
-	
+
 	if rsp.StatusCode != http.StatusOK {
 		errMsgBytes, _ := ioutil.ReadAll(rsp.Body)
 		return nil, &Error{StatusCode: rsp.StatusCode, Message: fmt.Sprintf("Failed to register host binding key with HVS. Error : %s", string(errMsgBytes))}
@@ -88,15 +88,15 @@ func (k *HostKey) CertifyHostSigningKey(key RegisterKeyInfo) (*SigningKeyCert, e
 	if err != nil {
 		return nil, errors.New("error marshalling signing key. ")
 	}
-	
+
 	certifyKeyURL, err := url.Parse(k.client.BaseURL)
 	if err != nil {
 		return nil, errors.New("error parsing base url. " + err.Error())
 	}
-	
-	certifyKeyURL.Path = path.Join(certifyKeyURL.Path,"/rpc/certify-host-signing-key")
+
+	certifyKeyURL.Path = path.Join(certifyKeyURL.Path, "/rpc/certify-host-signing-key")
 	fmt.Println(certifyKeyURL.String())
-	
+
 	req, err := http.NewRequest("POST", certifyKeyURL.String(), bytes.NewBuffer(kiJSON))
 	if err != nil {
 		return nil, errors.New(err.Error())

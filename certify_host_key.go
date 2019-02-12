@@ -42,7 +42,7 @@ func (e Error) Error() string {
 }
 
 // CertifyHostBindingKey sends a POST to /certify-host-binding-key to register binding key with HVS
-func (k *HostKey) CertifyHostBindingKey(key RegisterKeyInfo) (*BindingKeyCert, error) {
+func (k *HostKey) CertifyHostBindingKey(key *RegisterKeyInfo) (*BindingKeyCert, error) {
 	var keyCert BindingKeyCert
 
 	kiJSON, err := json.Marshal(key)
@@ -81,7 +81,7 @@ func (k *HostKey) CertifyHostBindingKey(key RegisterKeyInfo) (*BindingKeyCert, e
 }
 
 // CertifyHostSigningKey sends a POST to /certify-host-signing-key to register binding key with HVS
-func (k *HostKey) CertifyHostSigningKey(key RegisterKeyInfo) (*SigningKeyCert, error) {
+func (k *HostKey) CertifyHostSigningKey(key *RegisterKeyInfo) (*SigningKeyCert, error) {
 	var keyCert SigningKeyCert
 
 	kiJSON, err := json.Marshal(key)

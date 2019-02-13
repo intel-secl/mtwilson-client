@@ -46,7 +46,7 @@ func (k *HostKey) CertifyHostBindingKey(key *RegisterKeyInfo) (*BindingKeyCert, 
 	var keyCert BindingKeyCert
 	rsp, err := k.certifyHostKey(key, "/rpc/certify-host-binding-key", "binding")
 	if err != nil {
-       return nil, errors.New("error registering binding key with HVS. " + err.Error())
+		return nil, errors.New("error registering binding key with HVS. " + err.Error())
 	}
 	defer rsp.Body.Close()
 	err = json.NewDecoder(rsp.Body).Decode(&keyCert)
@@ -71,7 +71,6 @@ func (k *HostKey) CertifyHostSigningKey(key *RegisterKeyInfo) (*SigningKeyCert, 
 	}
 	return &keyCert, nil
 }
-
 
 func (k *HostKey) certifyHostKey(key *RegisterKeyInfo, endPoint string, keyUsage string) (*http.Response, error) {
 

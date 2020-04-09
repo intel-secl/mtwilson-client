@@ -6,7 +6,7 @@ package mtwilson
 
 import (
 	"crypto/tls"
-	commonTls "intel/isecl/lib/common/tls"
+	commonTls "intel/isecl/lib/common/v2/tls"
 	"net/http"
 )
 
